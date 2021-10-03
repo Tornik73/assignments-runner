@@ -1,4 +1,4 @@
-import { checkIsNumber } from "../utils";
+import { isNumber } from "../utils";
 
 export function mapTo(arr, arg) {
   if (!arg) {
@@ -22,7 +22,7 @@ export function mapToProfile(arr) {
         ? `${item.name ?? "_"} ${item.surname ?? "_"}`
         : null;
 
-    Object.defineProperties(
+    const obj = Object.defineProperties(
       {
         name: item.name ?? null,
         surname: item.surname ?? null,
@@ -52,7 +52,7 @@ export function mapToProfile(arr) {
 }
 
 export function filterBy(arr, arg) {
-  if (checkIsNumber(arg)) {
+  if (isNumber(arg)) {
     return arr.filter((item) => item >= arg);
   }
 
@@ -65,14 +65,51 @@ export function filterBy(arr, arg) {
   }
 }
 
-export function reduceTo() {
-  // TODO:
-  throw "Not implemented";
+export function reduceTo(inputList, keys) {
+  if (!keys) {
+    return inputList.reduce((acc, item) => acc + item, 0);
+  }
+
+  if (typeof keys === "string") {
+    return inputList.reduce((acc, item) => acc + item[keys], 0);
+  }
+
+  const sums = keys.map((key) => {
+    const sum = inputList.reduce((inputListAcc, inputListItem) => {
+      return inputListAcc + inputListItem[key];
+    }, 0);
+
+    return sum;
+  });
+
+  return sums;
 }
 
-export function sort() {
-  // TODO:
-  throw "Not implemented";
+export function sort(list, keys) {
+  if (!keys) {
+    return list.sort((a, b) => a - b);
+  }
+
+  if (typeof keys === "string") {
+    return list.sort((a, b) => a[keys] - b[keys]);
+  }
+
+  return list.sort((a, b) => {
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const field = key.field ? key.field : key;
+      const order = key.order ? key.order : null;
+      const isDescSort = order === "desc";
+
+      if (a[field] > b[field]) {
+        return isDescSort ? -1 : 1;
+      }
+      if (a[field] < b[field]) {
+        return isDescSort ? 1 : -1;
+      }
+    }
+    return 0;
+  });
 }
 
 export function complex() {

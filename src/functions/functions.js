@@ -1,4 +1,4 @@
-import { isEmpty, checkIsNumber } from "../utils";
+import { isEmpty, isNumber } from "../utils";
 
 const defaultCounterSymbol = Symbol("defaultCounter");
 
@@ -28,7 +28,7 @@ export function counter(...args) {
     }
     return countersStore[counterIndex].value++;
   }
-  if (checkIsNumber(args[0])) {
+  if (isNumber(args[0])) {
     return args[0];
   }
 }

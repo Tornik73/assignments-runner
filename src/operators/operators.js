@@ -1,19 +1,19 @@
-import { checkIsNumber, checkIsNumberArray } from "../utils";
+import { isNumber, isNumberArray } from "../utils";
 
 export function add(a, b) {
-  const isNumbersArray = checkIsNumberArray([a, b]);
+  const isNumbersArray = isNumberArray([a, b]);
 
   return isNumbersArray ? a + b : null;
 }
 
 export function subtract(a, b) {
-  const isNumbersArray = checkIsNumberArray([a, b]);
+  const isNumbersArray = isNumberArray([a, b]);
 
   return isNumbersArray ? a - b : null;
 }
 
 export function complex(a, b) {
-  const isNumbersArrays = checkIsNumberArray(a) && checkIsNumberArray(b);
+  const isNumbersArrays = isNumberArray(a) && isNumberArray(b);
 
   if (!isNumbersArrays) {
     return null;
@@ -21,7 +21,7 @@ export function complex(a, b) {
 
   const result = Math.pow(a[0] * a[1], b[0] / b[1]);
 
-  const isValidResult = checkIsNumber(result);
+  const isValidResult = isNumber(result);
 
   return isValidResult ? result : null;
 }

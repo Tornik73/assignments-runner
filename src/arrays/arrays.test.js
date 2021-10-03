@@ -77,8 +77,6 @@ describe("map", () => {
 
     const result = mapToProfile(inputList);
 
-    console.log(result);
-
     expect(result).toEqual(outputList);
 
     expect(result[2].isOld).toBe(false);
@@ -91,7 +89,7 @@ describe("map", () => {
 
 describe("reduce", () => {
   test("reduce to summary number", () => {
-    expect(reduceTo([1, 3, 5, 7])).toBe(6);
+    expect(reduceTo([1, 3, 5, 7])).toBe(16);
   });
 
   test("reduce to summary by property", () => {
