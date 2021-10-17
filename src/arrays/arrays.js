@@ -112,7 +112,48 @@ export function sort(list, keys) {
   });
 }
 
-export function complex() {
-  // TODO:
-  throw "Not implemented";
+export function complex(values, params) {
+  let resultValues = values;
+  params.forEach(({ operation, callback, property, order }) => {
+    switch (operation) {
+      case "filter": {
+        resultValues = resultValues.filter((value) =>
+          callback(value[property])
+        );
+        break;
+      }
+
+      case "map": {
+        resultValues = resultValues.map((value) => value[property]);
+        break;
+      }
+
+      case "reduce": {
+        resultValues = resultValues.reduce(
+          (acc, value) => acc + value[property],
+          0
+        );
+        break;
+      }
+
+      case "sort": {
+        resultValues = resultValues.sort((a, b) => {
+          const isDescSort = order === "desc";
+
+          if (a > b) {
+            return isDescSort ? -1 : 1;
+          }
+          if (a < b) {
+            return isDescSort ? 1 : -1;
+          }
+        });
+        break;
+      }
+
+      default:
+        return null;
+    }
+  });
+
+  return resultValues;
 }

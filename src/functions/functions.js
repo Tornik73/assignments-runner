@@ -2,34 +2,95 @@ import { isEmpty, isNumber } from "../utils";
 
 const defaultCounterSymbol = Symbol("defaultCounter");
 
-const countersStore = [
-  {
-    name: defaultCounterSymbol,
-    value: 0,
+const IncrementCounterModeEnum = Object.freeze({
+  default: 1,
+  last: 2,
+});
+
+const countersStore = {
+  incrementCounterMode: IncrementCounterModeEnum.default,
+  counters: [
+    {
+      name: defaultCounterSymbol,
+      value: 0,
+    },
+  ],
+};
+
+const countersSlice = {
+  add(value, name) {
+    const index = countersStore.counters.findIndex(
+      (item) => item.name === name && item.name !== undefined
+    );
+
+    if (index > -1) {
+      if (value && name) {
+        countersStore.counters[index].value = value;
+        return value;
+      }
+
+      countersStore.counters[index].value += value ? value : 1;
+      return countersStore.counters[index].value;
+    }
+
+    countersStore.counters.push({ name, value });
+
+    return value;
   },
-];
+
+  incrementByIndex(index) {
+    countersStore.counters[index].value += 1;
+
+    return countersStore.counters[index].value;
+  },
+
+  incrementLast() {
+    const lastElement =
+      countersStore.counters[countersStore.counters.length - 1];
+    lastElement.value += 1;
+
+    return lastElement.value;
+  },
+};
 
 export function counter(...args) {
-  if (args.length > 1) {
-    return countersStore[countersStore.length - 1].value++;
-  }
+  const incrementCounterMode = countersStore.incrementCounterMode;
 
-  if (isEmpty(args)) {
-    return countersStore[0].value++;
+  const isDefaultIncrementMode =
+    incrementCounterMode === IncrementCounterModeEnum.default;
+
+  const isLastIncrementMode =
+    incrementCounterMode === IncrementCounterModeEnum.last;
+
+  const isEmptyArguments = isEmpty(args);
+
+  if (isEmptyArguments) {
+    if (isDefaultIncrementMode) {
+      const prevValue = countersStore.counters[0].value;
+      countersSlice.incrementByIndex(0);
+      return prevValue;
+    }
+
+    if (isLastIncrementMode) {
+      return countersSlice.incrementLast();
+    }
+    return;
   }
 
   if (typeof args[0] === "string") {
-    const counterIndex = countersStore.findIndex(
-      (counter) => counter.name === args[0]
-    );
-    if (counterIndex === -1) {
-      countersStore.push({ value: 0, name: args[0] });
-      return 0;
-    }
-    return countersStore[counterIndex].value++;
+    countersStore.incrementCounterMode = IncrementCounterModeEnum.default;
+    countersStore.counters[0].value = 0;
+
+    return countersSlice.add(0, args[0]);
   }
+
+  if (isNumber(args[0]) && typeof args[1] === "string") {
+    return countersSlice.add(args[0], args[1]);
+  }
+
   if (isNumber(args[0])) {
-    return args[0];
+    countersStore.incrementCounterMode = IncrementCounterModeEnum.last;
+    return countersSlice.add(args[0]);
   }
 }
 
@@ -56,7 +117,48 @@ export function callableMultiplier(...args) {
   };
 }
 
-export function createCalculator() {
-  // TODO:
-  throw "Not implemented";
+const OperationEnum = Object.freeze({
+  init: "init",
+  add: "add",
+  subtract: "subtract",
+  add: "add",
+  multiply: "multiply",
+  divide: "divide",
+});
+
+export function createCalculator(inputValue) {
+  const initialValue = inputValue ?? 0;
+
+  return Object.defineProperties(
+    {
+      log: [{ operation: OperationEnum.init, value: initialValue }],
+      currentValue: initialValue,
+      add: function (value) {
+        this.log.push({ operation: OperationEnum.add, value });
+        this.currentValue += value;
+      },
+      subtract: function (value) {
+        this.log.push({ operation: OperationEnum.subtract, value });
+        this.currentValue -= value;
+      },
+      multiply: function (value) {
+        this.log.push({ operation: OperationEnum.multiply, value });
+        this.currentValue *= value;
+      },
+      divide: function (value) {
+        this.log.push({ operation: OperationEnum.divide, value });
+        this.currentValue /= value;
+      },
+    },
+    {
+      value: {
+        set: function () {
+          return;
+        },
+        get: function () {
+          return this.currentValue;
+        },
+      },
+    }
+  );
 }
